@@ -16,10 +16,10 @@ module.exports = {
 
 const checkExisting = (path) => fs.existsSync(path);
 
-const init = async () => {
-  if (!checkExisting('.migraterc.js')) {
+const init = async (path) => {
+  if (!checkExisting(path)) {
     write('[OK] - Creating file..', 'green');
-    await createFile('.migraterc.js');
+    await createFile(path);
     return write('[OK] - File created successfully.', 'green');
   }
   return write('[ERROR] - File already exists.', 'red');

@@ -1,46 +1,15 @@
 const {init} = require('./src/init');
 const {lookupChange} = require('./src/lookupChange');
-const fs = require('fs');
-const write = require('./src/writeMessage');
-
-const MODE = [
-    {"INIT": false},
-    {"LOOKUP": false}
-]
-
-const readConfig = () => {
-    return new Promise((resolve, reject) => {
-        if (!fs.existsSync('./.migraterc.js')) {
-            write('Config file does not exist..\n try running with --init first.', 'red');
-            return reject();
-        }
-        const test = require('./.migraterc.js');
-        if (!test.migrations || !fs.existsSync(test.migrations)) {
-            write('Migrations path does not exist..\n Check your config.', 'red');
-            return reject()
-        }
-        if (!test.models || !fs.existsSync(test.models)) {
-            write('Models path does not exist..\n Check your config.', 'red');
-            return reject()
-        }
-        resolve(test);
-    })
-}
-
-const checkArgument = (args) => {
-    for (arg of args) {
-        if (arg === "--init") {
-            MODE.INIT = true;
-        }
-    }
-}
+const {readConfig} = require('./src/processConfig');
+const {checkArgument} = require('./src/arguments');
+const path = require('path');
 
 const main = async (args) => {
-    checkArgument(args);
+    const MODE = checkArgument(args);
     if (MODE.INIT)
-        init();
+        return init(path.resolve(__dirname, '.migraterc.js'));
     try {
-        const config = await readConfig();
+        const config = await readConfig(path.resolve(__dirname, '.migraterc.js'));
         lookupChange(config);
     } catch (error) {
         throw error;
