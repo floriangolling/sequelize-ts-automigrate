@@ -5,6 +5,7 @@ const requireModule = require('./requireModule');
 const openDirectory = require('./openDirectory');
 const replaceDataTypes = require('./dataTypes');
 const requireTS = require('./requireTS');
+const manageFileType = require('./filetype');
 
 module.exports = {
   createFile,
@@ -14,4 +15,5 @@ module.exports = {
   openDirectory,
   replaceDataTypes,
   requireTS,
+  manageFileType,
 };

@@ -1,17 +1,11 @@
 const path = require('path');
-const { removeColumnLoop } = require('./removeColumn');
-const { createFile, replaceDataTypes } = require('../utils');
+const { createFile, manageFileType } = require('../utils');
+const { addColumnLoop } = require('./addColumnLoop');
+const { removeColumnLoop } = require('./removeColumnLoop');
 
-const addColumnLoop = (columns, tableName) => {
-  let content = '';
-  for (const column in columns) {
-    content += `await queryInterface.addColumn('${tableName}', '${column}',  ${replaceDataTypes(JSON.stringify(columns[column], null, 6))});\n    `;
-  }
-  return content;
-};
-
-const addColumn = async (tableName, paths, columns) => {
-  const content = `import { DataTypes, QueryInterface, Sequelize } from 'sequelize';
+const getContentType = (typescript, tableName, columns) => {
+  if (typescript) {
+    return `import { DataTypes, QueryInterface, Sequelize } from 'sequelize';
   
 export default {
     up: async (queryInterface: QueryInterface, sequelize: Sequelize) => {
@@ -21,8 +15,21 @@ export default {
         ${removeColumnLoop(columns, tableName)}
     }
 }`;
+  }
+  return `const { DataTypes } = require('sequelize');
 
-  await createFile(path.join(paths.migrations, `${Date.now().toString()}-${tableName}-addition-column-${Object.keys(columns).join('-')}.ts`, content));
+module.exports = {
+    up: async (queryInterface, sequelize) => {
+        ${addColumnLoop(columns, tableName)}
+    },
+    down: async (queryInterface, sequelize) => {
+        ${removeColumnLoop(columns, tableName)}
+    }
+}`;
+};
+
+const addColumn = async (tableName, paths, columns) => {
+  await createFile(path.join(paths.migrations, `${Date.now().toString()}-${tableName}-addition-column-${Object.keys(columns).join('-')}${manageFileType(paths)}`, getContentType(paths.typescript, tableName, columns)));
 };
 
 module.exports = {

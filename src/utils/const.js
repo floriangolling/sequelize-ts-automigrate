@@ -1,8 +1,9 @@
-const INIT_CONTENT = `const path = require('path');
+const INIT_CONTENT = (typescript) => `const path = require('path');
 
 module.exports = {
     migrations: path.join('src', 'database', 'migrations'),
-    models: path.join('src', 'database', 'models')
+    models: path.join('src', 'database', 'models'),
+    typescript: ${typescript}
 }`;
 
 const SEQUELIZE_MODULE = `
