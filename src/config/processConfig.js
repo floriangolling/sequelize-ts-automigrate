@@ -1,8 +1,7 @@
 const fs = require('fs');
-const write = require('./writeMessage');
+const { write } = require('../utils');
 
 const readConfig = (path) => new Promise((resolve, reject) => {
-  console.log(path);
   if (!fs.existsSync(path)) {
     write('Config file does not exist..\n try running with --init first.', 'red');
     return reject(Error(''));
@@ -19,6 +18,4 @@ const readConfig = (path) => new Promise((resolve, reject) => {
   return resolve(test);
 });
 
-module.exports = {
-  readConfig,
-};
+module.exports = readConfig;

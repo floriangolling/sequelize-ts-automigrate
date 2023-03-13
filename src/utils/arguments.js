@@ -12,4 +12,4 @@ const checkArgument = (args) => {
   return MODE;
 };
 
-module.exports = { checkArgument };
+module.exports = checkArgument;
