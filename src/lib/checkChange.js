@@ -114,6 +114,7 @@ const manageChange = (paths) => {
 };
 
 const lookupChange = async (paths) => {
+  const models = [];
   // ManageModel
 
   const directoryContent = openDirectory(paths.models, 'Models');
@@ -121,6 +122,7 @@ const lookupChange = async (paths) => {
   for (let i = 0; i < directoryContent.content.length; i += 1) {
     try {
       const ts = requireTS(path.join(paths.models, directoryContent.content[i]));
+      models.push(ts);
       ts.definition({});
       MODEL_STATES[ts.tableName] = ts.infos;
     } catch (err) {
@@ -128,7 +130,9 @@ const lookupChange = async (paths) => {
       continue;
     }
   }
-
+  for (const model of models) {
+    model.associate();
+  }
   // Managing migrations
 
   const migrationDirectory = openDirectory(paths.migrations, 'Migrations');

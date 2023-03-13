@@ -14,6 +14,18 @@ class Model {
     this.tableName = "";
   }
 
+  static hasMany(classFound, opts) {
+    classFound.infos[opts.foreignKey] = {
+      type: "DataTypes.INTEGER",
+      references: {
+        model: this.tableName,
+        key: 'id',
+      }
+    }
+    if (opts.onDelete)
+      classFound.infos[opts.foreignKey] = {...classFound.infos[opts.foreignKey], onDelete: opts.onDelete}
+  }
+
   static init(opts, infos) {
     this.tableName = infos.tableName;
     this.infos = {...opts,

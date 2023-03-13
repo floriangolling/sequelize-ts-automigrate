@@ -5,6 +5,7 @@ declare module 'sequelize' {
 
     declare abstract class Model {
         static public init : Function;
+        static public hasMany: Function;
     }
     
     declare type QueryInterface = {
