@@ -1,17 +1,75 @@
 const fs = require('fs');
 const path = require('path');
+const { register } = require('ts-node');
+const moduleRuntime = require('./moduleRunTime');
 const write = require('./writeMessage');
+const { compilerOptins } = require('../tsconfig.json');
 
-const readFile = (filePath) => {
-  try {
-    if (!fs.existsSync(filePath)) { return { content: {}, error: 'File does not exists.' }; }
-    const content = fs.readFileSync(filePath, 'utf-8');
-    write(`[${filePath}] model found.`, 'green');
-    return { content, error: null };
-  } catch (error) {
-    return { content: {}, error };
-  }
+const TABLE_STATES = {};
+const MODEL_STATES = {};
+
+register({ compilerOptins, files: path.join(__dirname, 'node.d.ts') });
+
+const SequelizeFakeInstance = {
+  QueryInterface: {
+    createTable: (name, opts) => {
+      TABLE_STATES[name] = opts;
+    },
+    dropTable: (name, opts) => {
+      delete TABLE_STATES[name];
+    },
+    removeColumn: (tableName, columnName) => {
+      if (TABLE_STATES[tableName] && TABLE_STATES[tableName][columnName]) delete TABLE_STATES[tableName][columnName];
+    },
+    addColumn: (tableName, columnName, opts) => {
+      if (TABLE_STATES[tableName]) TABLE_STATES[tableName][columnName] = opts;
+    },
+  },
+  DataTypes: {
+    INTEGER: 1,
+    STRING: 2,
+    DATE: 3,
+  },
 };
+
+moduleRuntime('sequelize', `
+
+class Model {
+  constructor() {
+    this.infos = {};
+    this.tableName = "";
+  }
+
+  static init(opts, infos) {
+    this.tableName = infos.tableName;
+    this.infos = opts;
+  }
+}
+
+module.exports = {
+  DataTypes: {
+    INTEGER: "DataTypes.INTEGER",
+    STRING: "DataTypes.STRING",
+    DATE: "DataTypes.DATE",
+  },
+    QueryInterface: {
+    createTable: (name, opts)  => {
+      TABLE_STATES[name] = opts;
+    },
+    dropTable: (name, opts) => {
+      TABLE_STATES[name] = null;
+    }
+  },
+  Sequelize: {},
+  Model
+}
+`);
+
+moduleRuntime('swagger-express-ts', `
+module.exports = {
+  ApiModel: () => {},
+  ApiModelProperty: () => {}
+}`);
 
 const openDirectory = (directoryPath) => {
   if (!fs.existsSync(directoryPath)) { return { content: {}, error: 'File does not exists.' }; }
@@ -24,68 +82,93 @@ const openDirectory = (directoryPath) => {
   }
 };
 
-const manageTokens = (content) => {
-  let endToken = 0;
-  const object = {
-    name: content.split(':')[0],
-    keys: {},
-  };
-  const keyContent = content.substring(content.indexOf('{') + 1, content.indexOf('}'));
-  const keys = keyContent.split(',');
-  for (let i = 0; i < keys.length; i += 1) {
-    if (keys[i]) {
-      const values = keys[i].split(':');
-      object.keys[values.at(0)] = values.at(1);
-      endToken = content.indexOf(values[1]) + values[1].length + 3;
-    }
-  }
-  return {
-    object,
-    endToken,
-  };
+const runTS = (filePath) => {
+  const result = require(filePath);
+  return result.default || result;
 };
 
-const manageModelFileContent = (content) => {
-  const infos = {
-    found: false,
-    index: 0,
-  };
+const reg = new RegExp(/("DataTypes.)\w+"/g);
 
-  const finalObject = [];
+const replaceDataTypes = (content) => {
+  let result;
 
-  const parseContent = content.trim().replace(' ', '').replace('\t', '').replace('\n', '')
-    .replace(/(\r\n|\n|\r)/gm, '')
-    .replace(/\s/g, '');
-  const index = parseContent.indexOf('.init({');
-  let cut = parseContent.slice(index + 6);
-  for (let i = 0; i < cut.length; i += 1) {
-    if (cut[i] === '{' && i !== 0) infos.found = true;
-    if (cut[i] === '}') {
-      if (infos.found === false) {
-        infos.index = i;
-        break;
-      } else infos.found = false;
-    }
+  while ((result = reg.exec(content)) !== null) {
+    const token = result[0].replace('"', '').slice(0, -1);
+    content = content.replace(result[0], token);
   }
-  cut = cut.slice(0, infos.index).slice(1);
-  while (1) {
-    const obj = manageTokens(cut);
-    if (obj.endToken === 0 && !obj.keys && !obj.name) break;
-    finalObject.push(obj.object);
-    cut = cut.slice(obj.endToken);
-  }
-  return finalObject;
+  return content;
 };
 
-const lookupChange = (paths) => {
+const createTableFile = (tableName, paths) => {
+  replaceDataTypes(JSON.stringify(MODEL_STATES[tableName]));
+  fs.writeFileSync(
+    path.join(paths.migrations, `${Date.now().toString()}-${tableName}-creation.ts`),
+    `import { DataTypes, QueryInterface, Sequelize } from 'sequelize';
+
+export default {
+  up: async (queryInterface: QueryInterface, sequelize: Sequelize) => {
+    return await queryInterface.createTable('${tableName}', ${replaceDataTypes(JSON.stringify(MODEL_STATES[tableName], null, 6))})
+  },
+  down: async (queryInterface: QueryInterface, sequelize: Sequelize) => {
+    return await queryInterface.dropTable('${tableName}');
+  }
+}`,
+  );
+};
+
+const deleteTableFile = (tableName, paths) => {
+
+};
+
+const manageTableDeletionCreation = (paths) => {
+  for (const prop in MODEL_STATES) {
+    if (!(prop in TABLE_STATES)) {
+      createTableFile(prop, paths);
+    }
+  }
+
+  for (const prop in TABLE_STATES) {
+    if (!(prop in MODEL_STATES)) {
+      console.log(`Must remove table: ${prop}`);
+    }
+  }
+};
+
+const manageChange = (paths) => {
+  manageTableDeletionCreation(paths);
+};
+
+const lookupChange = async (paths) => {
   const directoryContent = openDirectory(paths.models);
   if (directoryContent.error) { return write(`Couldnt open directory:\n${directoryContent.error}`, 'red'); }
   for (let i = 0; i < directoryContent.content.length; i += 1) {
-    const fileContent = readFile(path.join(paths.models, directoryContent.content[i]));
-    const keys = manageModelFileContent(fileContent.content);
-    console.log(keys);
-    if (fileContent.error) { return write(`Couldnt open file ${directoryContent.content[i]}:\n ${fileContent.error}`, 'red'); }
+    try {
+      const ts = runTS(path.join(paths.models, directoryContent.content[i]));
+      ts.definition({});
+      MODEL_STATES[ts.tableName] = ts.infos;
+    } catch (err) {
+      console.log(err);
+      continue;
+    }
   }
+
+  console.log('[MODEL STATE]:\n', MODEL_STATES);
+
+  // Managing migrations
+
+  const migrationDirectory = openDirectory(paths.migrations);
+  if (migrationDirectory.error) { return write(`Couldnt open directory:\n${migrationDirectory.error}`, 'red'); }
+  for (let i = 0; i < migrationDirectory.content.length; i += 1) {
+    try {
+      const ts = runTS(path.join(paths.migrations, migrationDirectory.content[i]));
+      ts.up(SequelizeFakeInstance.QueryInterface, SequelizeFakeInstance);
+    } catch (err) {
+      console.log(err);
+      continue;
+    }
+  }
+  console.log('[MIGRATION STATE]:\n', TABLE_STATES);
+  manageChange(paths);
   return null;
 };
 

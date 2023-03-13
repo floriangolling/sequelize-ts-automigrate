@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "experimentalDecorators": true,
+      "lib": ["es5"],
+      "target": "ESNext",
+      "allowJs": true,
+      "types": ["node"],
+      "skipLibCheck": true,
+      "strict": false,
+      "noEmit": true
+    }
+  }
+  
