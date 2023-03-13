@@ -1,8 +1,8 @@
 const INIT_CONTENT = (typescript) => `const path = require('path');
 
 module.exports = {
-    migrations: path.join('src', 'database', 'migrations'),
-    models: path.join('src', 'database', 'models'),
+    migrations: path.join(__dirname, 'src', 'database', 'migrations'),
+    models: path.join(__dirname, 'src', 'database', 'models'),
     typescript: ${typescript}
 }`;
 
@@ -37,6 +37,18 @@ class Model {
 }
 
 module.exports = {
+  JSON: "DataTypes.JSON",
+  JSONB: "DataTypes.JSONB",
+  UUIDV4: "DataTypes.UUIDV4",
+  UUID: "DataTypes.UUID",
+  UNSIGNED: "DataTypes.UNSIGNED",
+  DOUBLE: "DataTypes.DOUBLE",
+  FLOAT: "DataTypes.FLOAT",
+  BOOLEAN: "DataTypes.BOOLEAN",
+  TEXT: "DataTypes.TEXT",
+  INTEGER: "DataTypes.INTEGER",
+  STRING: "DataTypes.STRING",
+  DATE: "DataTypes.DATE",
   DataTypes: {
     JSON: "DataTypes.JSON",
     JSONB: "DataTypes.JSONB",

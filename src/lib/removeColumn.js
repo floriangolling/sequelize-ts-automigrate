@@ -1,7 +1,7 @@
 const path = require('path');
 const { createFile, manageFileType } = require('../utils');
-const { addColumnLoop } = require('./addColumnLoop');
-const { removeColumnLoop } = require('./removeColumnLoop');
+const addColumnLoop = require('./addColumnLoop');
+const removeColumnLoop = require('./removeColumnLoop');
 
 const getContentType = (typescript, tableName, columns) => {
   if (typescript) {

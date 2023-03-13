@@ -1,7 +1,7 @@
 const path = require('path');
 const { createFile, manageFileType } = require('../utils');
-const { addColumnLoop } = require('./addColumnLoop');
-const { removeColumnLoop } = require('./removeColumnLoop');
+const addColumnLoop = require('./addColumnLoop');
+const removeColumnLoop = require('./removeColumnLoop');
 
 const getContentType = (typescript, tableName, columns) => {
   if (typescript) {
@@ -29,7 +29,7 @@ module.exports = {
 };
 
 const addColumn = async (tableName, paths, columns) => {
-  await createFile(path.join(paths.migrations, `${Date.now().toString()}-${tableName}-addition-column-${Object.keys(columns).join('-')}${manageFileType(paths)}`, getContentType(paths.typescript, tableName, columns)));
+  await createFile(path.join(paths.migrations, `${Date.now().toString()}-${tableName}-addition-column-${Object.keys(columns).join('-')}${manageFileType(paths)}`), getContentType(paths.typescript, tableName, columns));
 };
 
 module.exports = {

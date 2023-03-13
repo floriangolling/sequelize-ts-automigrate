@@ -5,11 +5,18 @@ const path = require('path');
 
 const main = async (args) => {
     const MODE = checkArgument(args);
-    if (MODE.INIT)
-        return initConfig(path.resolve(__dirname, '.migraterc.js'));
+    if (MODE.INIT) {
+        if (MODE.TEST)
+            return initConfig(path.resolve(__dirname, '.migraterc.js'));
+        return initConfig(path.resolve(__dirname, '..', '..', '.migraterc.js'));
+    }
     try {
-        const config = await processConfig(path.resolve(__dirname, '.migraterc.js'));
-        lookupChange(config);
+        if (MODE.TEST) {
+            const config = await processConfig(path.resolve(__dirname, '.migraterc.js'));
+            return lookupChange(config);
+        }
+        const config = await processConfig(path.resolve(__dirname, '..', '..', '.migraterc.js'));
+        return lookupChange(config);
     } catch (error) {
         throw error;
     }

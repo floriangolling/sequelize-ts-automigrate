@@ -124,7 +124,7 @@ const lookupChange = async (paths) => {
       ts.definition({});
       MODEL_STATES[ts.tableName] = ts.infos;
     } catch (err) {
-      console.log(err);
+      write(err, 'red');
       continue;
     }
   }
@@ -136,9 +136,9 @@ const lookupChange = async (paths) => {
   for (let i = 0; i < migrationDirectory.content.length; i += 1) {
     try {
       const ts = requireTS(path.join(paths.migrations, migrationDirectory.content[i]));
-      ts.up(SequelizeFakeInstance.QueryInterface, SequelizeFakeInstance);
+      await ts.up(SequelizeFakeInstance.QueryInterface, SequelizeFakeInstance);
     } catch (err) {
-      console.log(err);
+      write(err, 'red');
       continue;
     }
   }
