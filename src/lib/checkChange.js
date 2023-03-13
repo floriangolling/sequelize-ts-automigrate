@@ -131,7 +131,8 @@ const lookupChange = async (paths) => {
     }
   }
   for (const model of models) {
-    model.associate();
+    if ('associate' in model)
+      model.associate();
   }
   // Managing migrations
 
