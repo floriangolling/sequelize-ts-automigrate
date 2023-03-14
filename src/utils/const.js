@@ -14,6 +14,30 @@ class Model {
     this.tableName = "";
   }
 
+  static belongsTo(classFound, opts) {
+    this.infos[opts.foreignKey] = {
+      type: "DataTypes.INTEGER",
+      references: {
+        model: classFound.tableName,
+        key: 'id',
+      }
+    }
+    if (opts.onDelete)
+      this.infos[opts.foreignKey] = {...infos.infos[opts.foreignKey], onDelete: opts.onDelete}
+  }
+
+  static hasOne(classFound, opts) {
+    classFound.infos[opts.foreignKey] = {
+      type: "DataTypes.INTEGER",
+      references: {
+        model: this.tableName,
+        key: 'id',
+      }
+    }
+    if (opts.onDelete)
+      classFound.infos[opts.foreignKey] = {...classFound.infos[opts.foreignKey], onDelete: opts.onDelete}
+  }
+
   static hasMany(classFound, opts) {
     classFound.infos[opts.foreignKey] = {
       type: "DataTypes.INTEGER",
@@ -27,7 +51,10 @@ class Model {
   }
 
   static init(opts, infos) {
-    this.tableName = infos.tableName;
+    if (infos.tableName)
+      this.tableName = infos.tableName;
+    if (infos.freezeTableName)
+      this.tableName = this.prototype.constructor.name.toLowerCase()
     this.infos = {...opts,
     id: {
         type: "DataTypes.INTEGER",

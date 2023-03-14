@@ -28,8 +28,8 @@ module.exports = {
 }`;
 };
 
-const addColumn = async (tableName, paths, columns) => {
-  await createFile(path.join(paths.migrations, `${Date.now().toString()}-${tableName}-addition-column-${Object.keys(columns).join('-')}${manageFileType(paths)}`), getContentType(paths.typescript, tableName, columns));
+const addColumn = async (tableName, paths, columns, migrationName) => {
+  await createFile(path.join(paths.migrations, `${migrationName.toString()}-${tableName}-addition-column-${Object.keys(columns).join('-')}${manageFileType(paths)}`), getContentType(paths.typescript, tableName, columns));
 };
 
 module.exports = {

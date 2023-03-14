@@ -10,6 +10,8 @@ const { SWAGGER_EXPRESS_MODULE, SEQUELIZE_MODULE } = require('../utils/const');
 const TABLE_STATES = {};
 const MODEL_STATES = {};
 
+const MIGRATIONS_STATES = [];
+
 const SequelizeFakeInstance = {
   QueryInterface: {
     createTable: (name, opts) => {
@@ -48,11 +50,14 @@ requireModule('sequelize', SEQUELIZE_MODULE);
 requireModule('swagger-express-ts', SWAGGER_EXPRESS_MODULE);
 
 const manageTableDeletionCreation = (paths) => {
+  let MIGRATIONS_STATES_NUMBER = Math.max(...MIGRATIONS_STATES) + 10;
+
   let change = false;
   for (const prop in MODEL_STATES) {
     if (!(prop in TABLE_STATES)) {
       change = true;
-      createTable(prop, paths, MODEL_STATES[prop]);
+      MIGRATIONS_STATES_NUMBER += 10;
+      createTable(prop, paths, MODEL_STATES[prop], MIGRATIONS_STATES_NUMBER);
       write(`[Creating table] - ${prop}\n\n`, 'green');
     }
   }
@@ -60,7 +65,8 @@ const manageTableDeletionCreation = (paths) => {
   for (const prop in TABLE_STATES) {
     if (!(prop in MODEL_STATES)) {
       change = true;
-      deleteTable(prop, paths, TABLE_STATES[prop]);
+      MIGRATIONS_STATES_NUMBER += 10;
+      deleteTable(prop, paths, TABLE_STATES[prop], MIGRATIONS_STATES_NUMBER);
       write(`[Deleting table] - ${prop}\n\n`, 'green');
     }
   }
@@ -93,14 +99,16 @@ const manageTableDeletionCreation = (paths) => {
   for (const table in columnsToRemove) {
     if (columnsToRemove[table] && Object.keys(columnsToRemove[table]).length > 0) {
       change = true;
+      MIGRATIONS_STATES_NUMBER += 10;
       write(`[Deleting columns to table: ${table}]\n${Object.keys(columnsToRemove[table]).map((x) => `- ${x}`).join('\n')}\n\n`, 'green');
-      removeColumn(table, paths, columnsToRemove[table]);
+      removeColumn(table, paths, columnsToRemove[table], MIGRATIONS_STATES_NUMBER);
     }
   }
   for (const table in columnToAdd) {
     if (columnToAdd[table] && Object.keys(columnToAdd[table]).length > 0) {
       change = true;
-      addColumn(table, paths, columnToAdd[table]);
+      MIGRATIONS_STATES_NUMBER += 10.0;
+      addColumn(table, paths, columnToAdd[table], MIGRATIONS_STATES_NUMBER);
       write(`[Adding columns to table: ${table}]\n${Object.keys(columnToAdd[table]).map((x) => `- ${x}`).join('\n')}\n\n`, 'green');
     }
   }
@@ -131,8 +139,7 @@ const lookupChange = async (paths) => {
     }
   }
   for (const model of models) {
-    if ('associate' in model)
-      model.associate();
+    if ('associate' in model) model.associate();
   }
   // Managing migrations
 
@@ -141,6 +148,7 @@ const lookupChange = async (paths) => {
   for (let i = 0; i < migrationDirectory.content.length; i += 1) {
     try {
       const ts = requireTS(path.join(paths.migrations, migrationDirectory.content[i]));
+      MIGRATIONS_STATES.push(parseInt(migrationDirectory.content[i]), 10);
       await ts.up(SequelizeFakeInstance.QueryInterface, SequelizeFakeInstance);
     } catch (err) {
       write(err, 'red');

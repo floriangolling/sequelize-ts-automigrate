@@ -27,8 +27,8 @@ module.exports = {
 `;
 };
 
-const createTable = async (tableName, paths, tableContent) => {
-  await createFile(path.join(paths.migrations, `${Date.now().toString()}-${tableName}-creation${manageFileType(paths)}`), getContentType(paths.typescript, tableName, tableContent));
+const createTable = async (tableName, paths, tableContent, migrationName) => {
+  await createFile(path.join(paths.migrations, `${migrationName.toString()}-${tableName}-creation${manageFileType(paths)}`), getContentType(paths.typescript, tableName, tableContent));
 };
 
 module.exports = createTable;

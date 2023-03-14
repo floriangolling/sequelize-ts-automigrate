@@ -28,8 +28,8 @@ export default {
     `;
 };
 
-const removeColumn = async (tableName, paths, columns) => {
-  await createFile(path.join(paths.migrations, `${Date.now().toString()}-${tableName}-deletion-column-${Object.keys(columns).join('-')}${manageFileType(paths)}`), getContentType(paths.typescript, tableName, columns));
+const removeColumn = async (tableName, paths, columns, migrationName) => {
+  await createFile(path.join(paths.migrations, `${migrationName.toString()}-${tableName}-deletion-column-${Object.keys(columns).join('-')}${manageFileType(paths)}`), getContentType(paths.typescript, tableName, columns));
 };
 
 module.exports = {

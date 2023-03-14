@@ -27,8 +27,8 @@ module.exports = {
 `;
 };
 
-const deleteTable = async (tableName, paths, tableContent) => {
-  await createFile(path.join(paths.migrations, `${Date.now().toString()}-${tableName}-deletion${manageFileType(paths)}`), getContentType(paths.typescript, tableName, tableContent));
+const deleteTable = async (tableName, paths, tableContent, migrationName) => {
+  await createFile(path.join(paths.migrations, `${migrationName.toString()}-${tableName}-deletion${manageFileType(paths)}`), getContentType(paths.typescript, tableName, tableContent));
 };
 
 module.exports = deleteTable;
