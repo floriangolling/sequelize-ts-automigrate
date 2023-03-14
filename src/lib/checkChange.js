@@ -130,9 +130,11 @@ const lookupChange = async (paths) => {
   for (let i = 0; i < directoryContent.content.length; i += 1) {
     try {
       const ts = requireTS(path.join(paths.models, directoryContent.content[i]));
-      models.push(ts);
-      ts.definition({});
-      MODEL_STATES[ts.tableName] = ts.infos;
+      if (ts.definition) {
+        models.push(ts);
+        ts.definition({});
+        MODEL_STATES[ts.tableName] = ts.infos;
+      }
     } catch (err) {
       write(err, 'red');
       continue;
