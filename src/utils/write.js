@@ -1,3 +1,5 @@
+/* eslint no-console: 0 */
+
 const COLORS = {
   red: '31',
   green: '32',

@@ -1,4 +1,5 @@
 const fs = require('fs');
+const write = require('./write');
 
 const openDirectory = (directoryPath, type, logs = false) => {
   if (!fs.existsSync(directoryPath)) { return { content: {}, error: 'File does not exists.' }; }

@@ -4,13 +4,16 @@ const checkArgument = (args) => {
     { LOOKUP: false },
     { TEST: false },
   ];
-
-  for (arg of args) {
-    if (arg === '--init') {
-      MODE.INIT = true;
-    }
-    if (arg === '--test') {
-      MODE.TEST = true;
+  for (let i = 0; i < args.length; i += 1) {
+    switch (args[i]) {
+      case '--init':
+        MODE.INIT = true;
+        break;
+      case '--test':
+        MODE.TEST = true;
+        break;
+      default:
+        break;
     }
   }
   return MODE;

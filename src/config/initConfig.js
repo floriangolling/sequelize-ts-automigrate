@@ -7,7 +7,7 @@ const init = async (path) => {
   if (!checkExisting(path)) {
     try {
       const rl = readline.createInterface(process.stdin, process.stdout);
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, _) => {
         readline.clearLine(process.stdout);
         rl.question('Using Typescript:\n\x1b[32m yes \x1b[0m | \x1b[31m no \x1b[0m\n', async (an) => {
           if (an.toLocaleLowerCase().includes('y')) typecript = true;
