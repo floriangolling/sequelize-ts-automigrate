@@ -114,7 +114,7 @@ class Model {
   }
 }
 
-module.exports = {
+const DataTypes = {
   JSON: 'DataTypes.JSON',
   JSONB: 'DataTypes.JSONB',
   UUIDV4: 'DataTypes.UUIDV4',
@@ -127,36 +127,29 @@ module.exports = {
   INTEGER: 'DataTypes.INTEGER',
   STRING: 'DataTypes.STRING',
   DATE: 'DataTypes.DATE',
-  DataTypes: {
-    JSON: 'DataTypes.JSON',
-    JSONB: 'DataTypes.JSONB',
-    UUIDV4: 'DataTypes.UUIDV4',
-    UUID: 'DataTypes.UUID',
-    UNSIGNED: 'DataTypes.UNSIGNED',
-    DOUBLE: 'DataTypes.DOUBLE',
-    FLOAT: 'DataTypes.FLOAT',
-    BOOLEAN: 'DataTypes.BOOLEAN',
-    TEXT: 'DataTypes.TEXT',
-    INTEGER: 'DataTypes.INTEGER',
-    STRING: 'DataTypes.STRING',
-    DATE: 'DataTypes.DATE',
-  },
-  QueryInterface: {
-    createTable: (name, opts) => {
-      TABLE_STATES[name] = opts;
-    },
-    dropTable: (name, opts) => {
-      TABLE_STATES[name] = null;
-    },
-    addColumn: (name, column, otps) => {
-      if (TABLE_STATES[name]) TABLE_STATES[name][column] = otps;
-    },
-    removeColumn: (name, column) => {
-      if (TABLE_STATES[name] && TABLE_STATES[name][column]) delete TABLE_STATES[name][column];
-    },
-  },
-  Model,
 };
 
+const QueryInterface = {
+  createTable: (name, opts) => {
+    TABLE_STATES[name] = opts;
+  },
+  dropTable: (name, opts) => {
+    TABLE_STATES[name] = null;
+  },
+  addColumn: (name, column, otps) => {
+    if (TABLE_STATES[name]) TABLE_STATES[name][column] = otps;
+  },
+  removeColumn: (name, column) => {
+    if (TABLE_STATES[name] && TABLE_STATES[name][column]) delete TABLE_STATES[name][column];
+  },
+};
+
+for (const type in DataTypes) {
+  module.exports[type] = DataTypes[type];
+}
+module.exports = Sequelize;
+module.exports.QueryInterface = QueryInterface;
+module.exports.DataTypes = DataTypes;
+module.exports.Model = Model;
 module.exports.Sequelize = Sequelize;
 module.exports.default = Sequelize;
