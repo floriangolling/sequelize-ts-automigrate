@@ -23,6 +23,8 @@ class Sequelize {
 
   DATE = 'DataTypes.DATE';
 
+  STRING = (n) => `DataTypes.STRING(${n})`;
+
   DataTypes = {
     JSON: 'DataTypes.JSON',
     JSONB: 'DataTypes.JSONB',
@@ -36,6 +38,7 @@ class Sequelize {
     INTEGER: 'DataTypes.INTEGER',
     STRING: 'DataTypes.STRING',
     DATE: 'DataTypes.DATE',
+    STRING: (n) => `DataTypes.STRING(${n})`,
   };
 
   constructor() {
@@ -127,6 +130,7 @@ const DataTypes = {
   INTEGER: 'DataTypes.INTEGER',
   STRING: 'DataTypes.STRING',
   DATE: 'DataTypes.DATE',
+  STRING: (n) => `DataTypes.STRING(${n})`,
 };
 
 const QueryInterface = {
