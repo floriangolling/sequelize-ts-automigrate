@@ -23,7 +23,7 @@ class Sequelize {
 
   DATE = 'DataTypes.DATE';
 
-  STRING = (n) => `DataTypes.STRING(${n})`;
+  STRING(n) { return `DataTypes.STRING(${n})`; }
 
   DataTypes = {
     JSON: 'DataTypes.JSON',
