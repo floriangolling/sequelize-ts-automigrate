@@ -134,6 +134,9 @@ const lookupChange = async (paths) => {
         models.push(ts);
         ts.definition({});
         MODEL_STATES[ts.tableName] = ts.infos;
+      } else if (ts.init) {
+        MODEL_STATES[ts.tableName] = ts.infos;
+        models.push(ts);
       }
     } catch (err) {
       write(err, 'red');
@@ -147,6 +150,7 @@ const lookupChange = async (paths) => {
 
   const migrationDirectory = openDirectory(paths.migrations, 'Migrations');
   if (migrationDirectory.error) { return write(`Couldnt open directory:\n${migrationDirectory.error}`, 'red'); }
+  if (migrationDirectory.content.length === 0) MIGRATIONS_STATES.push(Date.now());
   for (let i = 0; i < migrationDirectory.content.length; i += 1) {
     try {
       const ts = requireTS(path.join(paths.migrations, migrationDirectory.content[i]));

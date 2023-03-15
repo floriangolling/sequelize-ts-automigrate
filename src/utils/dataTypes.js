@@ -1,4 +1,4 @@
-const reg = new RegExp(/("DataTypes.)\w+"/g);
+const reg = new RegExp(/("DataTypes.)\w+.*"/g);
 
 const replaceDataTypes = (content) => {
   let result;

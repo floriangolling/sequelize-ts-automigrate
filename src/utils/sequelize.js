@@ -23,6 +23,8 @@ class Sequelize {
 
   DATE = 'DataTypes.DATE';
 
+  CHAR(n) { return `DataTypes.STRING(${n})`; }
+
   STRING(n) { return `DataTypes.STRING(${n})`; }
 
   DataTypes = {
@@ -39,6 +41,7 @@ class Sequelize {
     STRING: 'DataTypes.STRING',
     DATE: 'DataTypes.DATE',
     STRING: (n) => `DataTypes.STRING(${n})`,
+    CHAR: (n) => `DataTypes.STRING(${n})`,
   };
 
   constructor() {
@@ -117,6 +120,9 @@ class Model {
   }
 }
 
+const string = (n) => `DataTypes.STRING(${n})`;
+const char = (n) => `DataTypes.CHAR(${n})`;
+
 const DataTypes = {
   JSON: 'DataTypes.JSON',
   JSONB: 'DataTypes.JSONB',
@@ -130,7 +136,8 @@ const DataTypes = {
   INTEGER: 'DataTypes.INTEGER',
   STRING: 'DataTypes.STRING',
   DATE: 'DataTypes.DATE',
-  STRING: (n) => `DataTypes.STRING(${n})`,
+  STRING: string,
+  CHAR: char,
 };
 
 const QueryInterface = {
@@ -148,12 +155,13 @@ const QueryInterface = {
   },
 };
 
-for (const type in DataTypes) {
-  module.exports[type] = DataTypes[type];
-}
 module.exports = Sequelize;
 module.exports.QueryInterface = QueryInterface;
 module.exports.DataTypes = DataTypes;
 module.exports.Model = Model;
 module.exports.Sequelize = Sequelize;
 module.exports.default = Sequelize;
+
+for (const type in DataTypes) {
+  module.exports[type] = DataTypes[type];
+}
