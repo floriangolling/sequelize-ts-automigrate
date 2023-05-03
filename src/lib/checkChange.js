@@ -161,6 +161,21 @@ const lookupChange = async (paths) => {
       continue;
     }
   }
+
+  [TABLE_STATES, MODEL_STATES].forEach((INSTANCE) => {
+    Object.keys(INSTANCE).forEach((table) => {
+      Object.keys(INSTANCE[table]).forEach((column) => {
+        if (INSTANCE[table][column].type) {
+          if (typeof INSTANCE[table][column].type === 'object') {
+            INSTANCE[table][column].type = INSTANCE[table][column].type.toText();
+          } else if (typeof INSTANCE[table][column].type === 'function') {
+            INSTANCE[table][column].type = INSTANCE[table][column].type().toText();
+          }
+        }
+      });
+    });
+  });
+
   manageChange(paths);
   return null;
 };
