@@ -1,1 +1,2 @@
 # sequelize-ts-automigrate
+testarea
